@@ -11,6 +11,7 @@ services:
       - "15672:15672" # here, we can access rabbitmq management plugin
     networks:
       - main
+    restart: always
 
   admin-backend:
     image: sudiptob2/microserve-admin
