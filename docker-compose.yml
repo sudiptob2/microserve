@@ -6,11 +6,10 @@ services:
     hostname: rabbit
     image: rabbitmq:3.10.0-rc.3-management
     env_file: .env
-    ports:
-      - "5672:5672" # we forward this port because it's useful for debugging
-      - "15672:15672" # here, we can access rabbitmq management plugin
     networks:
       - main
+    ports:
+      - "127.0.0.1:15672:15672"
     restart: always
 
   admin-backend:
@@ -20,7 +19,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       - admin-db
       - rabbit
@@ -35,8 +34,6 @@ services:
       - .env
     volumes:
       - pg-data:/var/lib/postgresql/data
-    ports:
-      - "5411:5432"
     networks:
       - main
 
@@ -58,7 +55,7 @@ services:
       - .env
     command: "bash scripts/entrypoint.sh"
     ports:
-      - 8001:5000
+      - "127.0.0.1:8001:5000"
     depends_on:
       - main-db
       - rabbit
@@ -85,8 +82,6 @@ services:
       - .env
     volumes:
       - msql-data:/var/lib/mysql
-    ports:
-      - 33062:3306
     networks:
       - main
 
