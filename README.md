@@ -4,6 +4,13 @@ This is an experiment/Lab to practice deploying microservice application a local
 
 Also supporting services : `rabbit`, `postgres` and `mysql` are also created with this `docker-compose` in the production server
 
+### Related repositories:
+
+- [microserve-main](https://github.com/sudiptob2/microserve-main)
+- [microserve-main-front](https://github.com/sudiptob2/microserve-main-front)
+- [microserve-admin](https://github.com/sudiptob2/microserve-admin)
+- [microserve-admin-front](https://github.com/sudiptob2/microserve-admin-front)
+
 ![Alt text](images/system-architecture.jpg?raw=true "System Architecture")
 
 # Setting Up a Ubuntu VM
