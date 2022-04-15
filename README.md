@@ -116,9 +116,51 @@ see the status of the containers using following command
 
 ```
 docker ps
+```
 
+# Get the front-end files
+
+We can pull the front-end code from the github directly into the server. But as I said earlier, we will use `multipass transfer command` to move files from host computer to the server.
+
+Pull both front-end repo in your host machine. Now run the following commands to generate production build for the angular and react based frontends.
+
+### Admin frontend(React)
+
+First put appropriate env variables in the .env file. Base url in this case will be _admin.microserve.com_
 
 ```
+docker-compose up -d
+```
+
+```
+docker-compose exec web npm run build
+```
+
+make zip of the build folder
+
+```
+tar -czvf build-admin.tar.gz build
+```
+
+Transfer files to the multipass server
+
+```
+multipass transfer  build-admin.tar.gz demo-server:build-admin.tar.gz
+```
+
+Now in the server, unzip the files
+
+```
+tar -xf build-admin.tar.gz
+```
+
+Finally move the files into the `/var/www/admin-front` directory
+
+```
+sudo cp -r build/. /var/www/admin-front/
+```
+
+Similarly, we have to build and move the build folder to `/var/www/main-front` directory for the angular based main app.
 
 # Setting up nginx configurations
 
@@ -188,7 +230,9 @@ Now to enable these two configuration file we have to create a `sys link` with t
 
 ```
 sudo ln -s /etc/nginx/sites-available/microserve.com /etc/nginx/sites-enabled/microserve.com
+```
 
+```
 sudo ln -s /etc/nginx/sites-available/admin.microserve.com /etc/nginx/sites-enabled/admin.microserve.com
 ```
 
