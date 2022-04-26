@@ -13,20 +13,23 @@ services:
     restart: always
 
   admin-backend:
-    image: sudiptob2/microserve-admin
-    command: "bash scripts/backend_entrypoint.sh"
-    restart: always
-    env_file:
-      - .env
+    <<: &admin-backend # Image name is changed in production:
+      image: "sudiptob2/microserve-admin-v2:v1.0.7"
+      volumes:
+        - django-static:/var/www/django/static
+        - django-media:/var/www/django/media # serving django's media
+      depends_on:
+        - admin-db
+      networks:
+        - main
+      env_file: .env
+      environment:
+        DJANGO_DATABASE_HOST: admin-db
+    command: /start_dev.sh
+    expose:
+      - 8000
     ports:
       - "127.0.0.1:8000:8000"
-    depends_on:
-      - admin-db
-      - rabbit
-
-    networks:
-      - main
-
   admin-db:
     image: postgres
     restart: always
@@ -37,17 +40,42 @@ services:
     networks:
       - main
 
-  admin-queue:
-    image: sudiptob2/microserve-admin
-    env_file:
-      - .env
-    command: "python -u consumer.py"
-    depends_on:
-      - admin-db
-      - rabbit
-    restart: always
+  admin-redis:
+    image: redis:6.0.5
+    hostname: redis
+    volumes:
+      - redis-data:/data
+    env_file: .env
     networks:
       - main
+
+  admin-redis-commander:
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - "admin-redis"
+    networks:
+      - main
+
+  admin-consumer:
+    <<: *admin-backend
+    command: /start_consumer.sh
+
+  admin-asgiserver:
+    <<: *admin-backend
+    command: /start_asgi.sh
+
+  admin-celery:
+    <<: *admin-backend
+    command: /start_celery.sh
+
+  admin-beat:
+    <<: *admin-backend
+    command: /start_beat.sh
+    ports: []
 
   main-backend:
     image: sudiptob2/microserve-main
@@ -88,6 +116,9 @@ services:
 volumes:
   pg-data:
   msql-data:
+  redis-data:
+  django-static:
+  django-media:
 
 networks:
   main:
