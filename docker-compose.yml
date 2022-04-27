@@ -10,7 +10,7 @@ services:
       - main
     ports:
       - "127.0.0.1:15672:15672"
-    restart: always
+    restart: unless-stopped
 
   admin-backend:
     <<: &admin-backend # Image name is changed in production:
@@ -23,6 +23,7 @@ services:
       networks:
         - main
       env_file: .env
+      restart: unless-stopped
       environment:
         DJANGO_DATABASE_HOST: admin-db
     command: /start_dev.sh
@@ -32,7 +33,7 @@ services:
       - "127.0.0.1:8000:8000"
   admin-db:
     image: postgres
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -48,11 +49,12 @@ services:
     env_file: .env
     networks:
       - main
+    restart: unless-stopped
 
   admin-redis-commander:
     hostname: redis-commander
     image: rediscommander/redis-commander:latest
-    restart: always
+    restart: unless-stopped
     environment:
       - REDIS_HOST=redis
     depends_on:
@@ -63,10 +65,12 @@ services:
   admin-consumer:
     <<: *admin-backend
     command: /start_consumer.sh
+    restart: unless-stopped
 
   admin-asgiserver:
     <<: *admin-backend
     command: /start_asgi.sh
+    restart: unless-stopped
 
   admin-celery:
     <<: *admin-backend
@@ -76,6 +80,7 @@ services:
     <<: *admin-backend
     command: /start_beat.sh
     ports: []
+    restart: unless-stopped
 
   main-backend:
     image: sudiptob2/microserve-main
@@ -99,13 +104,13 @@ services:
     depends_on:
       - main-db
       - rabbit
-    restart: always
+    restart: unless-stopped
     networks:
       - main
 
   main-db:
     image: mysql:5.7.22
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
